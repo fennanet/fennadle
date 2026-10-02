@@ -1,0 +1,67 @@
+@font-face {
+	font-family: 'Chomsky';
+	src: url(./Chomsky.woff2);
+}
+@font-face {
+	font-family: 'Franklin';
+	src: url(./LibreFranklin-Bold.ttf);
+}
+
+.title {
+    text-align: center;
+    font-family: Chomsky;
+    font-weight: 200;
+    font-size: 45px;
+}
+
+.gridrow {
+    display: inline-flex;
+    margin-inline: auto;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.gridrow div {
+    border-color: #d3d6da;
+    border-width: 2px;
+    border-style: solid;
+    width: 65px;
+    height: 65px;
+    margin: 3px;
+}
+
+.key {
+    background-color: #d3d6da;
+    color: black;
+    display: flex;
+    justify-content: center; 
+    align-items: center;     
+    text-align: center;      
+    border-radius: 4px;
+    height: 60px;
+    font-family: Franklin;
+    font-size: 1.25em;
+    font-weight: 700;
+    user-select: none;
+    width: 50px;
+}
+
+.key.wide {
+    font-size: 1.25em;
+    width: 80px;
+}
+
+.keyboardRow {
+    display: inline-flex;
+    width: 100%;
+    margin: auto;
+    justify-content: center;
+    gap: 5px;
+    margin-block: 5px;
+}
+
+.keyboard {
+    margin-top: 20px;
+}
+
