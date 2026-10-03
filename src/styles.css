@@ -7,61 +7,101 @@
 	src: url(./LibreFranklin-Bold.ttf);
 }
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}
+
+.app-body {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 500px;
+    padding-inline: 8px;
+}
+
 .title {
     text-align: center;
     font-family: Chomsky;
     font-weight: 200;
-    font-size: 45px;
+    font-size: clamp(32px, 9vw, 45px);
 }
 
 .gridrow {
-    display: inline-flex;
-    margin-inline: auto;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
     width: 100%;
+    max-width: 350px;
+    margin: 0 auto 6px;
 }
 
 .gridrow div {
-    border-color: #d3d6da;
-    border-width: 2px;
-    border-style: solid;
-    width: 65px;
-    height: 65px;
-    margin: 3px;
-}
-
-.key {
-    background-color: #d3d6da;
+    border: 2px solid #d3d6da;
+    aspect-ratio: 1;
+    
+    flex: none;
     color: black;
     display: flex;
-    justify-content: center; 
-    align-items: center;     
-    text-align: center;      
-    border-radius: 4px;
-    height: 60px;
-    font-family: Franklin;
-    font-size: 1.25em;
-    font-weight: 700;
-    user-select: none;
-    width: 50px;
-}
-
-.key.wide {
-    font-size: 1.25em;
-    width: 80px;
-}
-
-.keyboardRow {
-    display: inline-flex;
-    width: 100%;
-    margin: auto;
     justify-content: center;
-    gap: 5px;
-    margin-block: 5px;
+    align-items: center;
+    text-align: center;
+    font-family: Franklin;
+    font-weight: 700;
+    font-size: 30px;
+    white-space: nowrap;
+    overflow: hidden;
+    user-select: none;
+    touch-action: manipulation;
+    
 }
 
 .keyboard {
-    margin-top: 20px;
+    width: 100%;
+    margin-block: 20px;
+    container-type: inline-size;
 }
 
+.keyboardRow {
+    --gap: 4px;
+    --key-w: calc((100cqw - 9 * var(--gap)) / 10);
+
+    display: flex;
+    justify-content: center;
+    gap: var(--gap);
+    margin-block: 5px;
+}
+
+.key {
+    flex: none;
+    width: var(--key-w);
+    height: calc(var(--key-w) * 1.4);
+    background-color: #d3d6da;
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-radius: 4px;
+    font-family: Franklin;
+    font-size: calc(var(--key-w) * 0.5);
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+.key.wide {
+    width: calc(var(--key-w) * 1.5 + var(--gap) / 2);
+    font-size: calc(var(--key-w) * 0.3);
+}
+
+.keyIcon {
+    height: 60%;
+    pointer-events: none;
+}
