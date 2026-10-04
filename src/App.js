@@ -6,7 +6,7 @@ import confetti from "canvas-confetti";
 import { init } from '@plausible-analytics/tracker'
 
 init({
-  domain: 'my-app.com'
+  domain: 'fennadle.fenna.net'
 })
 
 function getColors(guess, target) {
