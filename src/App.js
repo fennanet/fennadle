@@ -2,8 +2,12 @@
 import "./styles.css";
 import Backspace from "./backspace.svg";
 import { useEffect, useState } from "react";
+import confetti from "canvas-confetti";
+import { init } from '@plausible-analytics/tracker'
 
-const SECRET_WORD = "FRICK";
+init({
+  domain: 'my-app.com'
+})
 
 function getColors(guess, target) {
   const guessArr = guess.split("");
@@ -41,98 +45,165 @@ export default function Main() {
   const [currentRow, setCurrentRow] = useState(0);
   const [input, setInput] = useState("");
   const [gameOver, setGameOver] = useState(false);
+  const [dictionary, setDictionary] = useState(new Set());
+  const [modalContent, setModalContent] = useState("");
+  const [secretWord, setSecretWord] = useState("");
+  const [shareText, setShareText] = useState("");
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (gameOver) return;
+    fetch("/daily-words.json")
+      .then((res) => res.json())
+      .then((data) => {
+        const today = new Date().toISOString().split('T')[0];
+        setSecretWord(data[today] || "DEFAULT");
+      });
+  }, []);
 
-      if (e.key.length > 1 && e.key !== "Enter" && e.key !== "Backspace") return;
-
-      if (e.key === "Backspace") {
-        setInput((prev) => prev.slice(0, -1));
-      } else if (e.key === "Enter") {
-        if (input.length === 5) {
-          const guess = input.toUpperCase();
-          
-          const newColors = getColors(guess, SECRET_WORD);
-          
-          setGrid((prev) => {
-            const newGrid = [...prev];
-            newGrid[currentRow] = guess.split("");
-            return newGrid;
-          });
-
-          setColors((prev) => {
-            const newColorsGrid = [...prev];
-            newColorsGrid[currentRow] = newColors;
-            return newColorsGrid;
-          });
-
-          if (guess === SECRET_WORD) {
-            setGameOver(true);
-          } else if (currentRow >= 5) {
-            setGameOver(true);
-          } else {
-            setCurrentRow((prev) => prev + 1);
-            setInput("");
-          }
+  useEffect(() => {
+    fetch('/words.json')
+      .then(response => response.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setDictionary(new Set(data));
+          console.log('dictionary loaded');
+        } else {
+          console.error('Expected an array in words.json');
         }
-      } else if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
-        if (input.length < 5 && currentRow < 5 && !gameOver) {
-          setInput((prev) => prev + e.key.toUpperCase());
-        }
-      }
-    };
+      })
+      .catch(error => console.error('Error loading dictionary:', error));
+  }, []);
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [input, currentRow, gameOver]);
-
-  const handleVirtualClick = (value) => {
+  const handleInput = (value) => {
+    setModalContent("");
+  
     if (gameOver) return;
-
+  
     if (value === "BACKSPACE") {
       setInput((prev) => prev.slice(0, -1));
-    } else if (value === "ENTER") {
-      if (input.length === 5) {
-        const guess = input.toUpperCase();
-        const newColors = getColors(guess, SECRET_WORD);
-
-        setGrid((prev) => {
-          const newGrid = [...prev];
-          newGrid[currentRow] = guess.split("");
-          return newGrid;
-        });
-
-        setColors((prev) => {
-          const newColorsGrid = [...prev];
-          newColorsGrid[currentRow] = newColors;
-          return newColorsGrid;
-        });
-
-        if (guess === SECRET_WORD) {
-          setGameOver(true);
-        } else if (currentRow >= 5) {
-          setGameOver(true);
-        } else {
-          setCurrentRow((prev) => prev + 1);
-          setInput("");
-        }
+      return;
+    }
+  
+    if (value === "ENTER") {
+      if (input.length !== 5) return;
+  
+      const guess = input.toUpperCase();
+  
+      if (!dictionary.has(guess.toLowerCase())) {
+        setModalContent("not in dictionary");
+        setInput("");
+        return;
       }
-    } else if (/[a-zA-Z]/.test(value)) {
+  
+      const newColors = getColors(guess, secretWord);
+  
+      setGrid((prev) => {
+        const newGrid = [...prev];
+        newGrid[currentRow] = guess.split("");
+        return newGrid;
+      });
+  
+      setColors((prev) => {
+        const newColorsGrid = [...prev];
+        newColorsGrid[currentRow] = newColors;
+        return newColorsGrid;
+      });
+  
+      if (guess === secretWord || currentRow >= 5) {
+        triggerConfetti();
+        setGameOver(true);
+        
+        const ShareTextContent = () => {
+          colors[currentRow].fill('green')
+          const d = new Date();
+          let date = d.toDateString();
+          let content = "fennadle " + date + "\n" + (currentRow + 1) +"/6";
+          
+          for (let y of colors) {
+            content += "\n";
+            console.log(y);
+            for (let char of y) {
+              if (char === 'green') {
+                content += "🟩";
+              } else if (char === 'yellow') {
+                content += "🟨";
+              } else if (char === null || char === undefined) {
+                      content += ""; 
+              } else {
+                content += "⬛";
+              }
+            } 
+          }
+          console.log(content);
+          return content;
+        };
+        
+        setShareText(ShareTextContent());
+      } else {
+        setCurrentRow((prev) => prev + 1);
+        setInput("");
+      }
+  
+      return;
+    }
+  
+    if (/[a-zA-Z]/.test(value)) {
       if (input.length < 5 && currentRow < 5) {
-        setInput((prev) => prev + value);
+        setInput((prev) => prev + value.toUpperCase());
       }
     }
   };
+  
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (
+        e.key.length > 1 &&
+        e.key !== "Enter" &&
+        e.key !== "Backspace"
+      ) {
+        return;
+      }
+  
+      if (e.key === "Enter") {
+        handleInput("ENTER");
+      } else if (e.key === "Backspace") {
+        handleInput("BACKSPACE");
+      } else {
+        handleInput(e.key);
+      }
+    };
+  
+    window.addEventListener("keydown", handleKeyDown);
+  
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [input, currentRow, gameOver, dictionary]);
+  
+  const handleVirtualClick = (value) => {
+    handleInput(value);
+  };
+
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#9B59B6', '#3498DB']
+    });
+  };
+
 
   return (
     <div className="app-body">
+      <Modal text={modalContent} />
+      <ShareButton text={shareText} />
       <h1 className="title">The Fenna Times</h1>
       <Grid text={grid} currentInput={input} currentRow={currentRow} colors={colors} />
       <div className="keyboard">
         <Keyboard onClick={handleVirtualClick} />
       </div>
+      <a className="note" href="https://www.fenna.net?ref=wordgame" target={"_blank"} rel={"noreferrer"}><i>my personal website</i></a>
+      <p className="note"><i>note: This is not, in any way, affiliated with The New York Times Games / Wordle.</i></p>
     </div>
   );
 }
@@ -218,3 +289,56 @@ function Key({ value, onClick }) {
   );
 }
 
+function Modal({ text }) {
+  return (
+    <div>
+      { (text !== "") &&
+        <div className="modal" key={text}>
+          <div>
+            {text}
+          </div>
+        </div>
+      }
+    </div>
+    
+  );
+}
+
+function ShareButton({ text }) {
+  const [copyText, setCopyText] = useState('copy result');
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text); 
+      setCopyText('result copied!');
+      
+      setTimeout(() => setCopyText('copy result'), 2000);
+    } catch (error) {
+      console.error('Error copying:', error);
+      setCopyText('copy failed');
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ text });
+      } else {
+        await handleCopy();
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
+  return (
+    <div className="shareDialogue">
+      {text !== "" && (
+        <div>
+          <p>hooray!</p>
+          <button onClick={handleShare}>share result</button>
+          <button onClick={handleCopy}>{copyText}</button>
+        </div>
+      )}
+    </div>
+  );
+}

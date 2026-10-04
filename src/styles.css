@@ -94,6 +94,7 @@ body {
     overflow: hidden;
     user-select: none;
     touch-action: manipulation;
+    cursor:pointer;
 }
 
 .key.wide {
@@ -123,4 +124,70 @@ body {
 }
 .cell.current { 
     background-color: #dcdcdc; 
+}
+
+.modal {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+}
+
+.modal div{
+  position: fixed;
+  z-index: 1;
+  top: 100px;
+  overflow: auto;
+  text-align: center;
+  box-shadow: 0px 2px 10px gray;
+  background-color: white;
+  border-radius: 5px;
+  padding: 10px;
+  font-family: Franklin;
+  animation: horizontal-shaking 0.2s;
+}
+
+@keyframes horizontal-shaking {
+ 0% { transform: translateX(0) }
+ 25% { transform: translateX(5px) }
+ 50% { transform: translateX(-5px) }
+ 75% { transform: translateX(5px) }
+ 100% { transform: translateX(0) }
+}
+
+.note {
+    font-family: Franklin;
+    color: darkslategray;
+    font-size: 15px;
+}
+
+.shareDialogue div {
+    position: fixed;
+    z-index: 1;
+    top: 100px;
+    overflow: auto;
+    text-align: center;
+    box-shadow: 0px 2px 10px gray;
+    background-color: white;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: Franklin;
+}
+
+.shareDialogue {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+}
+
+.shareDialogue div button {
+  cursor:pointer;
+  width: 100%;
+  margin-block: 5px;
+  border: none;
+  border-radius: 5px;
+  padding-block: 2px;
+  background-color: #dcdcdc;
+  font-family: Franklin;
 }
