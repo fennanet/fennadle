@@ -306,36 +306,70 @@ function Modal({ text }) {
 
 function ShareButton({ text }) {
   const [copyText, setCopyText] = useState('copy result');
+
   const handleCopy = async () => {
+    if (!text) return;
+
     try {
-      await navigator.clipboard.writeText(text); 
+      await navigator.clipboard.writeText(text);
       setCopyText('result copied!');
-      
       setTimeout(() => setCopyText('copy result'), 2000);
-    } catch (error) {
-      console.error('Error copying:', error);
-      setCopyText('copy failed');
+    } catch (err) {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        
+        setCopyText('result copied!');
+        setTimeout(() => setCopyText('copy result'), 2000);
+      } catch (fallbackError) {
+        console.error('Fallback copy failed:', fallbackError);
+        setCopyText('copy failed');
+      }
     }
   };
 
   const handleShare = async () => {
+    if (!text) return;
+
+    if (!navigator.share) {
+      console.log('Web Share API not supported, falling back to copy');
+      await handleCopy();
+      return;
+    }
+
     try {
-      if (navigator.share) {
-        await navigator.share({ text });
+
+      await navigator.share({ 
+        title: 'Result', 
+        text: text
+      });
+      
+      setCopyText('shared!');
+      setTimeout(() => setCopyText('copy result'), 2000);
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('User cancelled share');
       } else {
+        console.error('Share failed:', error);
         await handleCopy();
       }
-    } catch (error) {
-      console.error('Error sharing:', error);
     }
   };
 
   return (
     <div className="shareDialogue">
-      {text !== "" && (
+      {text && (
         <div>
           <p>hooray!</p>
-          <button onClick={handleShare}>share result</button>
+          <button onClick={handleShare}>
+            share result
+          </button>
           <button onClick={handleCopy}>{copyText}</button>
         </div>
       )}
