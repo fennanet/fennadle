@@ -202,8 +202,8 @@ export default function Main() {
       <div className="keyboard">
         <Keyboard onClick={handleVirtualClick} />
       </div>
-      <a className="note" href="https://www.fenna.net?ref=wordgame" target={"_blank"} rel={"noreferrer"}><i>my personal website</i></a>
-      <p className="note"><i>note: This is not, in any way, affiliated with The New York Times Games / Wordle.</i></p>
+      <a className="note" href="https://www.fenna.net?ref=wordgame" target={"_blank"} rel={"noreferrer"}><i>also see: my personal website</i></a>
+      <p className="note"><i>note: Fennadle is not, in any way, affiliated with The New York Times Games / Wordle.</i></p>
     </div>
   );
 }
