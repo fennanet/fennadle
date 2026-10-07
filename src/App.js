@@ -1,4 +1,3 @@
-
 import "./styles.css";
 import Backspace from "./backspace.svg";
 import { useEffect, useState } from "react";
@@ -325,7 +324,7 @@ function ShareButton({ text }) {
         document.execCommand('copy');
         document.body.removeChild(textarea);
         
-        setCopyText('result copied!');
+        setCopyText('result copied instead!');
         setTimeout(() => setCopyText('copy result'), 2000);
       } catch (fallbackError) {
         console.error('Fallback copy failed:', fallbackError);
