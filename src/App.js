@@ -48,6 +48,7 @@ export default function Main() {
   const [modalContent, setModalContent] = useState("");
   const [secretWord, setSecretWord] = useState("");
   const [shareText, setShareText] = useState("");
+  const [shareDialogueText, setShareDialogueText] = useState("game over")
 
   useEffect(() => {
     fetch("/daily-words.json")
@@ -108,7 +109,10 @@ export default function Main() {
       });
   
       if (guess === secretWord || currentRow >= 5) {
-        triggerConfetti();
+        if (guess === secretWord) {
+          triggerConfetti(); 
+          setShareDialogueText("hooray");
+        }
         setGameOver(true);
         
         const ShareTextContent = () => {
@@ -146,7 +150,7 @@ export default function Main() {
     }
   
     if (/[a-zA-Z]/.test(value)) {
-      if (input.length < 5 && currentRow < 5) {
+      if (input.length < 5 && currentRow <= 5) {
         setInput((prev) => prev + value.toUpperCase());
       }
     }
@@ -195,7 +199,7 @@ export default function Main() {
   return (
     <div className="app-body">
       <Modal text={modalContent} />
-      <ShareButton text={shareText} />
+      <ShareButton text={shareText} dialogueText={shareDialogueText} />
       <h1 className="title">The Fenna Times</h1>
       <Grid text={grid} currentInput={input} currentRow={currentRow} colors={colors} />
       <div className="keyboard">
@@ -303,7 +307,7 @@ function Modal({ text }) {
   );
 }
 
-function ShareButton({ text }) {
+function ShareButton({ text, dialogueText }) {
   const [copyText, setCopyText] = useState('copy result');
 
   const handleCopy = async () => {
@@ -365,7 +369,7 @@ function ShareButton({ text }) {
     <div className="shareDialogue">
       {text && (
         <div>
-          <p>hooray!</p>
+          <p>{dialogueText}</p>
           <button onClick={handleShare}>
             share result
           </button>
