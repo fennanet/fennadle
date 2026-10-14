@@ -206,6 +206,7 @@ export default function Main() {
         <Keyboard onClick={handleVirtualClick} />
       </div>
       <a className="note" href="https://www.fenna.net?ref=fennadle" target={"_blank"} rel={"noreferrer"}><i>also see: my personal website</i></a>
+      <a className="note" href="https://codeberg.org/fenna/fennadle" target={"_blank"} rel={"noreferrer"}><i>source code</i></a>
       <p className="note"><i>note: Fennadle is not, in any way, affiliated with The New York Times Games / Wordle.</i></p>
     </div>
   );
