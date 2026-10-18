@@ -55,7 +55,7 @@ export default function Main() {
       .then((res) => res.json())
       .then((data) => {
         const today = new Date().toISOString().split('T')[0];
-        setSecretWord(data[today] || "DEFAULT");
+        setSecretWord(data[today] || "SHITE");
       });
   }, []);
 
@@ -111,7 +111,7 @@ export default function Main() {
       if (guess === secretWord || currentRow >= 5) {
         if (guess === secretWord) {
           triggerConfetti(); 
-          setShareDialogueText("hooray");
+          setShareDialogueText("hooray!!");
         }
         setGameOver(true);
         
@@ -199,7 +199,7 @@ export default function Main() {
   return (
     <div className="app-body">
       <Modal text={modalContent} />
-      <ShareButton text={shareText} dialogueText={shareDialogueText} />
+      <ShareButton text={shareText} dialogueText={shareDialogueText} secretWord={secretWord} />
       <h1 className="title">The Fenna Times</h1>
       <Grid text={grid} currentInput={input} currentRow={currentRow} colors={colors} />
       <div className="keyboard">
@@ -308,8 +308,13 @@ function Modal({ text }) {
   );
 }
 
-function ShareButton({ text, dialogueText }) {
+function ShareButton({ text, dialogueText, secretWord }) {
   const [copyText, setCopyText] = useState('copy result');
+  let wordReveal;
+
+  if (dialogueText === 'game over' ) {
+    wordReveal = 'the word was: ' + secretWord;
+  } 
 
   const handleCopy = async () => {
     if (!text) return;
@@ -371,6 +376,7 @@ function ShareButton({ text, dialogueText }) {
       {text && (
         <div>
           <p>{dialogueText}</p>
+          <p>{wordReveal}</p>
           <button onClick={handleShare}>
             share result
           </button>
