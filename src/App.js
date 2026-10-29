@@ -90,7 +90,6 @@ export default function Main() {
   
       if (!dictionary.has(guess.toLowerCase())) {
         setModalContent("not in dictionary");
-        setInput("");
         return;
       }
   
