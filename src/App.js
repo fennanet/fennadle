@@ -111,11 +111,10 @@ export default function Main() {
         if (guess === secretWord) {
           triggerConfetti(); 
           setShareDialogueText("hooray!!");
+          colors[currentRow].fill('green')
         }
         setGameOver(true);
-        
         const ShareTextContent = () => {
-          colors[currentRow].fill('green')
           const d = new Date();
           let date = d.toDateString();
           let content = "fennadle " + date + "\n" + (currentRow + 1) +"/6";
