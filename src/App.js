@@ -2,11 +2,6 @@ import "./styles.css";
 import Backspace from "./backspace.svg";
 import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
-import { init } from '@plausible-analytics/tracker'
-
-init({
-  domain: 'fennadle.fenna.net'
-})
 
 function getColors(guess, target) {
   const guessArr = guess.split("");
@@ -38,6 +33,25 @@ function getColors(guess, target) {
   return colors;
 }
 
+function getLocalDateKey(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function buildShareText(allColors, won, rowsUsed) {
+  const score = won ? rowsUsed : "X";
+  const rows = allColors
+    .filter((row) => row.some(Boolean))
+    .map((row) =>
+      row
+        .map((c) => (c === "green" ? "🟩" : c === "yellow" ? "🟨" : "⬛"))
+        .join("")
+    );
+  return `fennadle ${new Date().toDateString()}\n${score}/6\n${rows.join("\n")}`;
+}
+
 export default function Main() {
   const [grid, setGrid] = useState(Array.from({ length: 6 }, () => Array(5).fill(null)));
   const [colors, setColors] = useState(Array.from({ length: 6 }, () => Array(5).fill(null)));
@@ -54,7 +68,7 @@ export default function Main() {
     fetch("/daily-words.json")
       .then((res) => res.json())
       .then((data) => {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getLocalDateKey();
         setSecretWord(data[today] || "SHITE");
       });
   }, []);
@@ -94,56 +108,27 @@ export default function Main() {
       }
   
       const newColors = getColors(guess, secretWord);
-  
-      setGrid((prev) => {
-        const newGrid = [...prev];
-        newGrid[currentRow] = guess.split("");
-        return newGrid;
-      });
-  
-      setColors((prev) => {
-        const newColorsGrid = [...prev];
-        newColorsGrid[currentRow] = newColors;
-        return newColorsGrid;
-      });
-  
-      if (guess === secretWord || currentRow >= 5) {
-        if (guess === secretWord) {
-          triggerConfetti(); 
+
+      const finalColors = colors.map((row, i) => (i === currentRow ? newColors : row));
+      const finalGrid = grid.map((row, i) => (i === currentRow ? guess.split("") : row));
+
+      setGrid(finalGrid);
+      setColors(finalColors);
+
+      const won = guess === secretWord;
+
+      if (won || currentRow >= 5) {
+        if (won) {
+          triggerConfetti();
           setShareDialogueText("hooray!!");
-          colors[currentRow].fill('green')
         }
         setGameOver(true);
-        const ShareTextContent = () => {
-          const d = new Date();
-          let date = d.toDateString();
-          let content = "fennadle " + date + "\n" + (currentRow + 1) +"/6";
-          
-          for (let y of colors) {
-            content += "\n";
-            console.log(y);
-            for (let char of y) {
-              if (char === 'green') {
-                content += "🟩";
-              } else if (char === 'yellow') {
-                content += "🟨";
-              } else if (char === null || char === undefined) {
-                      content += ""; 
-              } else {
-                content += "⬛";
-              }
-            } 
-          }
-          console.log(content);
-          return content;
-        };
-        
-        setShareText(ShareTextContent());
+        setShareText(buildShareText(finalColors, won, currentRow + 1));
       } else {
         setCurrentRow((prev) => prev + 1);
         setInput("");
       }
-  
+
       return;
     }
   
