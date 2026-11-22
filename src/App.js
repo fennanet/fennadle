@@ -33,6 +33,23 @@ function getColors(guess, target) {
   return colors;
 }
 
+function getKeyColors(grid, colors) {
+  const rank = { gray: 1, yellow: 2, green: 3 };
+  const result = {};
+
+  grid.forEach((row, r) => {
+    row.forEach((letter, c) => {
+      const color = colors[r][c];
+      if (!letter || !color) return;
+      if (!result[letter] || rank[color] > rank[result[letter]]) {
+        result[letter] = color;
+      }
+    });
+  });
+
+  return result;
+}
+
 function getLocalDateKey(d = new Date()) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -178,6 +195,7 @@ export default function Main() {
     });
   };
 
+  const keyColors = getKeyColors(grid, colors);
 
   return (
     <div className="app-body">
@@ -186,7 +204,7 @@ export default function Main() {
       <h1 className="title">The Fenna Times</h1>
       <Grid text={grid} currentInput={input} currentRow={currentRow} colors={colors} />
       <div className="keyboard">
-        <Keyboard onClick={handleVirtualClick} />
+        <Keyboard onClick={handleVirtualClick} keyColors={keyColors} />
       </div>
       <a className="note" href="https://www.fenna.net?ref=fennadle" target={"_blank"} rel={"noreferrer"}><i>also see: my personal website</i></a> <br />
       <a className="note" href="https://codeberg.org/fenna/fennadle" target={"_blank"} rel={"noreferrer"}><i>source code</i></a>
@@ -244,13 +262,18 @@ const ROWS = [
   ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "BACKSPACE"],
 ];
 
-function Keyboard({ onClick }) {
+function Keyboard({ onClick, keyColors }) {
   return (
     <>
       {ROWS.map((row, i) => (
         <div className="keyboardRow" key={i}>
           {row.map((value) => (
-            <Key key={value} value={value} onClick={onClick} />
+            <Key
+              key={value}
+              value={value}
+              onClick={onClick}
+              color={keyColors[value]}
+            />
           ))}
         </div>
       ))}
@@ -258,12 +281,17 @@ function Keyboard({ onClick }) {
   );
 }
 
-function Key({ value, onClick }) {
+function Key({ value, onClick, color }) {
   const handleClick = () => {
     if (onClick) onClick(value);
   };
 
-  const className = WIDE_KEYS.includes(value) ? "key wide" : "key";
+  // the grid uses "gray" internally, but the key CSS class is "black"
+  const colorClass = color === "gray" ? "black" : color || "";
+
+  const className = `key ${WIDE_KEYS.includes(value) ? "wide" : ""} ${colorClass}`
+    .replace(/\s+/g, " ")
+    .trim();
 
   return (
     <div className={className} onClick={handleClick}>
